@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CORAQ — Prediksi</title>
+<link rel="stylesheet" href="tes.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ══════════════ SIDEBAR ══════════════ -->
+<aside class="sidebar">
+    <div class="sidebar-logo">
+    <img src="coraqlogo.png" alt="CORAQ" style="height:40px;width:auto;object-fit:contain;">
+    <div class="logo-sub">Monitoring Limbah Batik</div>
+    </div>
+
+  <nav class="nav-section">
+    <div class="nav-label">Menu</div>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">🏠</span> Dashboard
+    </a>
+    <a class="nav-item active" href="#">
+      <span class="nav-icon">📈</span> Prediksi
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">🔬</span> Monitoring
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">🕓</span> History
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">⚙️</span> Settings
+    </a>
+  </nav>
+
+  <div class="sidebar-user">
+    <div class="user-info">
+      <div class="user-avatar">C</div>
+      <div>
+        <div class="user-name">coraq</div>
+        <div class="user-role">Industri Batik</div>
+      </div>
+    </div>
+    <button class="btn-logout">
+      <span>↩</span> Logout
+    </button>
+  </div>
+</aside>
+
+<!-- ══════════════ MAIN ══════════════ -->
+<div class="main">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-title">Prediksi Volume Limbah</div>
+    <div class="topbar-right">
+      <div class="topbar-date" id="topbarDate"></div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <div class="page-header">
+      <h2>Prediksi & Deteksi Anomali</h2>
+      <p>Masukkan data 3 hari terakhir dan produksi hari ini untuk mendapatkan ramalan volume dan status anomali</p>
+    </div>
+
+    <!-- Input -->
+    <div class="section-title">Parameter Input</div>
+    <div class="card">
+      <div class="input-grid">
+        <div class="field">
+          <label>Event Lag 1 (kemarin)</label>
+          <input type="number" id="lag1" placeholder="cth: 22" min="0">
+          <div class="hint">Jumlah event sensor t-1</div>
+        </div>
+        <div class="field">
+          <label>Event Lag 2 (2 hari lalu)</label>
+          <input type="number" id="lag2" placeholder="cth: 24" min="0">
+          <div class="hint">Jumlah event sensor t-2</div>
+        </div>
+        <div class="field">
+          <label>Event Lag 3 (3 hari lalu)</label>
+          <input type="number" id="lag3" placeholder="cth: 21" min="0">
+          <div class="hint">Jumlah event sensor t-3</div>
+        </div>
+        <div class="field">
+          <label>Jumlah Kain (lembar)</label>
+          <input type="number" id="jumlah_kain" placeholder="cth: 120" min="0">
+          <div class="hint">Produksi kain hari ini</div>
+        </div>
+        <div class="field">
+          <label>Panjang Kain (meter)</label>
+          <input type="number" id="panjang_kain_m" placeholder="cth: 2.7" step="0.1" min="0">
+          <div class="hint">Rata-rata panjang per kain</div>
+        </div>
+        <div class="field">
+          <button class="btn-run" id="btn" onclick="runPrediction()">▶ Jalankan Prediksi</button>
+        </div>
+      </div>
+      <div class="loading" id="loading"><div class="spinner"></div>Menghubungi model...</div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat hl-teal">
+        <div class="stat-label">SVR Forecast</div>
+        <div class="stat-val" id="valEvent">—</div>
+        <div class="stat-unit">jumlah event besok</div>
+      </div>
+      <div class="stat hl-orange">
+        <div class="stat-label">Estimasi Volume</div>
+        <div class="stat-val" id="valLiter">—</div>
+        <div class="stat-unit">liter limbah</div>
+      </div>
+      <div class="stat" id="statStatus">
+        <div class="stat-label">Status OCSVM</div>
+        <div class="stat-val" id="valStatus">—</div>
+        <div id="statusBadge"></div>
+      </div>
+      <div class="stat" id="statTg">
+        <div class="stat-label">Notifikasi Telegram</div>
+        <div class="stat-val" id="valTg">—</div>
+        <div class="stat-unit" id="subTg"></div>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="section-title">Tren 7 Hari ke Depan</div>
+    <div class="card anim" id="chartCard">
+      <div class="chart-header">
+        <div class="chart-title">Forecast Rolling SVR + Confidence Band</div>
+        <div style="display:flex;gap:.65rem;align-items:center">
+          <div class="toggle-wrap">
+            <button class="toggle-btn active" id="btnLiter" onclick="switchUnit('liter')">Liter</button>
+            <button class="toggle-btn" id="btnEvent" onclick="switchUnit('event')">Event</button>
+          </div>
+          <div class="chart-legend">
+            <span><span class="legend-dot" style="background:#0D9488"></span>Forecast</span>
+            <span><span class="legend-dot" style="background:rgba(13,148,136,.25)"></span>Confidence</span>
+          </div>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <div class="empty" id="chartEmpty">
+          <div class="empty-icon">📊</div>
+          Jalankan prediksi untuk melihat grafik
+        </div>
+        <canvas id="myChart" style="display:none"></canvas>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="section-title">Riwayat Prediksi</div>
+    <div class="card anim" id="histCard">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Waktu</th><th>Lag 1</th><th>Lag 2</th><th>Lag 3</th>
+              <th>Kain</th><th>Panjang</th><th>Forecast (ev)</th>
+              <th>Volume (L)</th><th>Score</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="histBody">
+            <tr><td colspan="11" style="text-align:center;color:var(--muted);padding:2rem">Belum ada riwayat</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API = 'http://127.0.0.1:5000/';
+const LITER_RATIO = 292;
+let chart = null, chartUnit = 'liter', lastData = null, rowCount = 0;
+
+// Set tanggal topbar
+document.getElementById('topbarDate').textContent =
+  new Date().toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+async function runPrediction() {
+  const lag1 = parseFloat(document.getElementById('lag1').value);
+  const lag2 = parseFloat(document.getElementById('lag2').value);
+  const lag3 = parseFloat(document.getElementById('lag3').value);
+  const kain = parseFloat(document.getElementById('jumlah_kain').value);
+  const pjg  = parseFloat(document.getElementById('panjang_kain_m').value);
+  if ([lag1,lag2,lag3,kain,pjg].some(v=>isNaN(v))) { alert('Harap isi semua field.'); return; }
+
+  setLoading(true);
+  try {
+    // Prediksi gabungan
+    const r1 = await fetch(`${API}/predict`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ events:[lag3,lag2,lag1], jumlah_kain:kain, panjang_kain_m:pjg, source:'Dashboard Web' })
+    });
+    const d1 = await r1.json();
+    if (d1.error) throw new Error(d1.error);
+
+    // Rolling 7 hari
+    const r2 = await fetch(`${API}/predict/rolling`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ events:[lag3,lag2,lag1], days:7 })
+    });
+    const d2 = await r2.json();
+    if (d2.error) throw new Error(d2.error);
+
+    const forecast  = d1.svr.forecast;
+    const isAnomaly = d1.ocsvm.is_anomaly;
+    const score     = d1.ocsvm.score;
+    const tgSent    = d1.telegram_sent;
+    const liter     = forecast * LITER_RATIO;
+
+    lastData = { lag1, lag2, lag3, forecast, isAnomaly, rolling: d2.forecasts };
+
+    updateStats(forecast, liter, isAnomaly, score, tgSent);
+    renderChart();
+    addHistory(lag1, lag2, lag3, kain, pjg, forecast, liter, score, isAnomaly);
+    document.getElementById('statsGrid').classList.add('show');
+    document.getElementById('chartCard').classList.add('show');
+    document.getElementById('histCard').classList.add('show');
+  } catch(e) { alert('Error: '+e.message); }
+  finally { setLoading(false); }
+}
+
+function updateStats(forecast, liter, isAnomaly, score, tgSent) {
+  document.getElementById('valEvent').textContent = forecast.toFixed(0);
+  document.getElementById('valLiter').textContent = liter.toLocaleString('id-ID');
+  document.getElementById('statStatus').className = 'stat '+(isAnomaly?'hl-red':'hl-green');
+  document.getElementById('valStatus').textContent = isAnomaly?'ANOMALI':'NORMAL';
+  document.getElementById('statusBadge').innerHTML = isAnomaly
+    ? '<span class="badge badge-anomali">⚠️ Peringatan Dini</span>'
+    : '<span class="badge badge-normal">✅ Kondisi Aman</span>';
+  document.getElementById('statTg').className = 'stat '+(tgSent?'hl-red':'hl-green');
+  document.getElementById('valTg').textContent  = tgSent?'Terkirim':'Normal';
+  document.getElementById('subTg').textContent  = tgSent?'Alert anomali dikirim':'Tidak ada notifikasi';
+}
+
+function switchUnit(unit) {
+  chartUnit = unit;
+  document.getElementById('btnLiter').className='toggle-btn'+(unit==='liter'?' active':'');
+  document.getElementById('btnEvent').className='toggle-btn'+(unit==='event'?' active':'');
+  if (lastData) renderChart();
+}
+
+function renderChart() {
+  if (!lastData) return;
+  const { lag1, lag2, lag3, forecast, isAnomaly, rolling } = lastData;
+  const isLiter = chartUnit==='liter', mult=isLiter?LITER_RATIO:1, unit=isLiter?'liter':'event';
+  const labels=[], values=[], upper=[], lower=[], ptColors=[], today=new Date();
+
+  [[lag3,-3],[lag2,-2],[lag1,-1]].forEach(([v,o])=>{
+    const d=new Date(today); d.setDate(today.getDate()+o);
+    labels.push(d.toLocaleDateString('id-ID',{day:'2-digit',month:'short'}));
+    values.push(+(v*mult).toFixed(1)); upper.push(null); lower.push(null);
+    ptColors.push('#0D9488');
+  });
+
+  rolling.forEach((f,i)=>{
+    const d=new Date(today); d.setDate(today.getDate()+i+1);
+    labels.push(d.toLocaleDateString('id-ID',{day:'2-digit',month:'short'}));
+    values.push(isLiter?f.forecast_liter:f.forecast_event);
+    upper.push(isLiter?f.upper_liter:f.upper_event);
+    lower.push(isLiter?f.lower_liter:f.lower_event);
+    ptColors.push(i===0&&isAnomaly?'#EF4444':'#0D9488');
+  });
+
+  document.getElementById('chartEmpty').style.display='none';
+  const canvas=document.getElementById('myChart'); canvas.style.display='block';
+  if(chart) chart.destroy();
+
+  chart=new Chart(canvas,{
+    type:'line',
+    data:{labels,datasets:[
+      { label:'Upper', data:upper, borderColor:'transparent', backgroundColor:'rgba(13,148,136,0.12)', pointRadius:0, fill:'+1', tension:.4 },
+      { label:isLiter?'Volume (liter)':'Jumlah Event', data:values,
+        borderColor:'#0D9488', backgroundColor:'transparent', borderWidth:2.5,
+        pointBackgroundColor:ptColors, pointBorderColor:'#fff', pointBorderWidth:2,
+        pointRadius:5, pointHoverRadius:7, tension:.4, fill:false },
+      { label:'Lower', data:lower, borderColor:'transparent', backgroundColor:'rgba(13,148,136,0.12)', pointRadius:0, fill:false, tension:.4 }
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{backgroundColor:'#134E4A',titleColor:'#99F6E4',bodyColor:'#fff',padding:10,cornerRadius:10,
+          filter:item=>item.datasetIndex===1,
+          callbacks:{
+            label:ctx=>` ${ctx.parsed.y.toLocaleString('id-ID')} ${unit}`,
+            afterLabel:ctx=>{
+              const i=ctx.dataIndex-3;
+              if(i<0||!rolling[i]) return '';
+              const f=rolling[i];
+              const lo=isLiter?f.lower_liter:f.lower_event;
+              const hi=isLiter?f.upper_liter:f.upper_event;
+              return ` Rentang: ${lo.toLocaleString('id-ID')}–${hi.toLocaleString('id-ID')} ${unit}`;
+            }
+          }
+        }
+      },
+      scales:{
+        x:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:10,family:'Poppins'},maxRotation:30}},
+        y:{grid:{color:'#F3F4F6'},ticks:{color:'#9CA3AF',font:{size:10,family:'Poppins'},
+          callback:v=>isLiter?v.toLocaleString('id-ID')+' L':v+' ev'}}
+      }
+    }
+  });
+}
+
+function addHistory(l1,l2,l3,kain,pjg,forecast,liter,score,isAnomaly) {
+  rowCount++;
+  const now=new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const body=document.getElementById('histBody');
+  if(rowCount===1) body.innerHTML='';
+  body.insertAdjacentHTML('afterbegin',`
+    <tr>
+      <td style="font-weight:600;color:var(--muted)">${rowCount}</td>
+      <td>${now}</td><td>${l1}</td><td>${l2}</td><td>${l3}</td>
+      <td>${kain}</td><td>${pjg}</td>
+      <td style="font-weight:700;color:var(--teal)">${forecast.toFixed(2)}</td>
+      <td style="font-weight:700;color:var(--orange)">${liter.toLocaleString('id-ID')} L</td>
+      <td style="color:${score<0?'var(--red)':'var(--green)'}">${score.toFixed(4)}</td>
+      <td><span class="tag ${isAnomaly?'tag-anomali':'tag-normal'}">${isAnomaly?'⚠️ Anomali':'✅ Normal'}</span></td>
+    </tr>`);
+}
+
+function setLoading(on) {
+  document.getElementById('loading').className='loading'+(on?' show':'');
+  document.getElementById('btn').disabled=on;
+  document.getElementById('btn').textContent=on?'Memproses...':'▶ Jalankan Prediksi';
+}
+</script>
+</body>
+</html>
