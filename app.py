@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
 from groq import Groq
-from pyngrok import ngrok
+
 
 load_dotenv()
 warnings.filterwarnings("ignore")
@@ -67,7 +67,7 @@ def ask_llm(prompt: str) -> str:
         prediksi_info = "\n    Belum ada prediksi. Minta user jalankan prediksi dahulu."
 
     system_prompt = f"""
-    Kamu adalah CoraqBot, asisten kecerdasan buatan sistem monitoring limbah batik CORAQ (Continuous Observation Remote Analysis Quantification) di Pekalongan.
+    Kamu adalah CoraqBot, asisten kecerdasan buatan sistem monitoring limbah batik CORAQ singkatan dari Continuous Observation Remote Analysis Quantification di Kota Pekalongan.
     Sistem CORAQ: Bak 1 (monitoring awal) → Bak 2 (elektrokoagulasi, 30 menit) →
     Bak 3 (flokulasi 20 menit + sedimentasi 30 menit) → Bak 4 (netralisasi + monitoring akhir).
     ML: SVR forecast volume harian, OCSVM deteksi anomali. 1 event = 292 liter.
@@ -88,12 +88,12 @@ def ask_llm(prompt: str) -> str:
 app.register_blueprint(predict_bp)
 app.register_blueprint(misc_bp)
 
-# ── Run ──────────────────────────────────────────────────────────────────────
+# ── Telegram polling — jalan saat startup gunicorn ───────────────────────────
+threading.Thread(
+    target=polling_telegram, args=(ask_llm,), daemon=True
+).start()
+
+# ── Run (development only) ───────────────────────────────────────────────────
 if __name__ == "__main__":
-    public_url = ngrok.connect(5000)
-    print(f"\n🌐 Public URL: {public_url}\n")
-    threading.Thread(
-        target=polling_telegram, args=(ask_llm,), daemon=True
-    ).start()
     port = int(os.environ.get("PORT", 5000))
     app.run(debug=False, host="0.0.0.0", port=port, use_reloader=False)

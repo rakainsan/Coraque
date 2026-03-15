@@ -65,7 +65,7 @@ def get_rekomendasi(oc_score: float, event_lag1: float,
                     "lokasi": "Bak 3 — Sedimentasi",
                     "alasan": "Flokulasi lebih efektif menangani partikel "
                               "tersuspensi tambahan "
-                              "(Radityaningrum & Caroline, 2017)"
+                              
                 }
             ],
             "infrastruktur": []
@@ -87,7 +87,7 @@ def get_rekomendasi(oc_score: float, event_lag1: float,
                     "lokasi": "Bak 3 — Sedimentasi",
                     "alasan": "PAC membentuk flok lebih cepat dari Tawas "
                               "saat hydraulic retention time memendek "
-                              "(Radityaningrum & Caroline, 2017)"
+                              
                 },
                 {
                     "nama"  : "Tawas Al₂(SO₄)₃",
@@ -95,7 +95,7 @@ def get_rekomendasi(oc_score: float, event_lag1: float,
                     "lokasi": "Bak 4 dan 3 — Netralisasi Sedimentasi",
                     "alasan": "Kombinasi PAC + Tawas optimal untuk "
                               "penurunan warna limbah batik "
-                              "(Zaimaturahmi, 2023)"
+                              
                 }
             ],
             "infrastruktur": []
@@ -117,14 +117,14 @@ def get_rekomendasi(oc_score: float, event_lag1: float,
                     "dosis" : "75–100 mg/L",
                     "lokasi": "Bak 3 — Sedimentasi",
                     "alasan": "Dosis tinggi untuk tangani beban organik ekstrem "
-                              "(Radityaningrum, 2017)"
+                              
                 },
                 {
                     "nama"  : "Tawas Al₂(SO₄)₃",
                     "dosis" : "150 mg/L",
                     "lokasi": "Bak 4 — Netralisasi",
                     "alasan": "Netralisasi pH output dan koagulasi sekunder "
-                              "(Zaimaturahmi, 2023)"
+                              
                 }
             ],
             "infrastruktur": [
