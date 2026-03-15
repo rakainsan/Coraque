@@ -6,35 +6,56 @@
 <title>CORAQ — Prediksi</title>
 <link rel="stylesheet" href="tes.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+.rek-card{background:#fff;border-radius:14px;padding:1.5rem;margin-bottom:1.25rem;border:2px solid transparent;display:none}
+.rek-card.show{display:block;animation:fadeUp .4s ease}
+.rek-card.sev-normal{border-color:#10B981;background:#F0FDF4}
+.rek-card.sev-ringan{border-color:#F59E0B;background:#FFFBEB}
+.rek-card.sev-sedang{border-color:#EF4444;background:#FFF5F5}
+.rek-card.sev-berat{border-color:#7C3AED;background:#FAF5FF}
+.rek-card.sev-peringatan{border-color:#3B82F6;background:#EFF6FF}
+.rek-header{display:flex;align-items:center;gap:.85rem;margin-bottom:1rem}
+.rek-emoji{font-size:2rem;line-height:1}
+.rek-title{font-size:1rem;font-weight:700;color:#111;margin:0 0 .15rem}
+.rek-badge{display:inline-block;padding:.2rem .7rem;border-radius:99px;font-size:.7rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.badge-normal{background:#D1FAE5;color:#065F46}
+.badge-ringan{background:#FEF3C7;color:#92400E}
+.badge-sedang{background:#FEE2E2;color:#991B1B}
+.badge-berat{background:#EDE9FE;color:#4C1D95}
+.badge-peringatan{background:#DBEAFE;color:#1E40AF}
+.rek-tindakan{font-size:.875rem;color:#374151;line-height:1.6;margin-bottom:1.1rem;padding:.75rem 1rem;background:rgba(0,0,0,.04);border-radius:8px;border-left:3px solid #9CA3AF}
+.sev-ringan .rek-tindakan{border-left-color:#F59E0B}
+.sev-sedang .rek-tindakan{border-left-color:#EF4444}
+.sev-berat .rek-tindakan{border-left-color:#7C3AED}
+.sev-peringatan .rek-tindakan{border-left-color:#3B82F6}
+.rek-sub-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6B7280;margin-bottom:.65rem}
+.rek-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:700px){.rek-grid{grid-template-columns:1fr}}
+.kimia-item,.infra-item{display:flex;align-items:flex-start;gap:.75rem;padding:.65rem .9rem;background:#fff;border-radius:8px;border:1px solid #E5E7EB;margin-bottom:.5rem;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.kimia-icon,.infra-icon{font-size:1.2rem;flex-shrink:0;margin-top:.05rem}
+.kimia-nama,.infra-nama{font-size:.82rem;font-weight:700;color:#111}
+.kimia-dosis{font-size:.78rem;color:#059669;font-weight:600;margin:.1rem 0}
+.kimia-lokasi{font-size:.73rem;color:#9CA3AF}
+.kimia-alasan,.infra-tindakan{font-size:.73rem;color:#6B7280;font-style:italic;margin-top:.15rem;line-height:1.5}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+</style>
 </head>
 <body>
 
 <!-- ══════════════ SIDEBAR ══════════════ -->
 <aside class="sidebar">
-    <div class="sidebar-logo">
+  <div class="sidebar-logo">
     <img src="coraqlogo.png" alt="CORAQ" style="height:40px;width:auto;object-fit:contain;">
     <div class="logo-sub">Monitoring Limbah Batik</div>
-    </div>
-
+  </div>
   <nav class="nav-section">
     <div class="nav-label">Menu</div>
-    <a class="nav-item" href="#">
-      <span class="nav-icon">🏠</span> Dashboard
-    </a>
-    <a class="nav-item active" href="#">
-      <span class="nav-icon">📈</span> Prediksi
-    </a>
-    <a class="nav-item" href="#">
-      <span class="nav-icon">🔬</span> Monitoring
-    </a>
-    <a class="nav-item" href="#">
-      <span class="nav-icon">🕓</span> History
-    </a>
-    <a class="nav-item" href="#">
-      <span class="nav-icon">⚙️</span> Settings
-    </a>
+    <a class="nav-item" href="#"><span class="nav-icon">🏠</span> Dashboard</a>
+    <a class="nav-item active" href="#"><span class="nav-icon">📈</span> Prediksi</a>
+    <a class="nav-item" href="#"><span class="nav-icon">🔬</span> Monitoring</a>
+    <a class="nav-item" href="#"><span class="nav-icon">🕓</span> History</a>
+    <a class="nav-item" href="#"><span class="nav-icon">⚙️</span> Settings</a>
   </nav>
-
   <div class="sidebar-user">
     <div class="user-info">
       <div class="user-avatar">C</div>
@@ -43,9 +64,7 @@
         <div class="user-role">Industri Batik</div>
       </div>
     </div>
-    <button class="btn-logout">
-      <span>↩</span> Logout
-    </button>
+    <button class="btn-logout"><span>↩</span> Logout</button>
   </div>
 </aside>
 
@@ -128,6 +147,29 @@
       </div>
     </div>
 
+    <!-- Rekomendasi -->
+    <div class="section-title" id="rekTitle" style="display:none">Rekomendasi Sistem</div>
+    <div class="rek-card" id="rekCard">
+      <div class="rek-header">
+        <div class="rek-emoji" id="rekEmoji">—</div>
+        <div>
+          <div class="rek-title" id="rekJudul">—</div>
+          <span class="rek-badge" id="rekBadge">—</span>
+        </div>
+      </div>
+      <div class="rek-tindakan" id="rekTindakan">—</div>
+      <div class="rek-grid" id="rekGrid">
+        <div id="rekKimiaWrap">
+          <div class="rek-sub-title">🧪 Bahan Kimia</div>
+          <div id="rekKimia"></div>
+        </div>
+        <div id="rekInfraWrap">
+          <div class="rek-sub-title">🏗️ Tindakan Tambahan</div>
+          <div id="rekInfra"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Chart -->
     <div class="section-title">Tren 7 Hari ke Depan</div>
     <div class="card anim" id="chartCard">
@@ -162,11 +204,11 @@
             <tr>
               <th>#</th><th>Waktu</th><th>Lag 1</th><th>Lag 2</th><th>Lag 3</th>
               <th>Kain</th><th>Panjang</th><th>Forecast (ev)</th>
-              <th>Volume (L)</th><th>Score</th><th>Status</th>
+              <th>Volume (L)</th><th>Score</th><th>Status</th><th>Severity</th>
             </tr>
           </thead>
           <tbody id="histBody">
-            <tr><td colspan="11" style="text-align:center;color:var(--muted);padding:2rem">Belum ada riwayat</td></tr>
+            <tr><td colspan="12" style="text-align:center;color:var(--muted);padding:2rem">Belum ada riwayat</td></tr>
           </tbody>
         </table>
       </div>
@@ -176,13 +218,20 @@
 </div>
 
 <script>
-const API = 'http://127.0.0.1:5000/';
+const API = 'http://127.0.0.1:5000';
 const LITER_RATIO = 292;
 let chart = null, chartUnit = 'liter', lastData = null, rowCount = 0;
 
-// Set tanggal topbar
 document.getElementById('topbarDate').textContent =
   new Date().toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+const SEV_CONFIG = {
+  normal    : { cls:'sev-normal',    badge:'badge-normal',    label:'Normal' },
+  ringan    : { cls:'sev-ringan',    badge:'badge-ringan',    label:'Spike Ringan' },
+  sedang    : { cls:'sev-sedang',    badge:'badge-sedang',    label:'Spike Sedang' },
+  berat     : { cls:'sev-berat',     badge:'badge-berat',     label:'Spike Berat' },
+  peringatan: { cls:'sev-peringatan',badge:'badge-peringatan',label:'Drop — Peringatan' },
+};
 
 async function runPrediction() {
   const lag1 = parseFloat(document.getElementById('lag1').value);
@@ -194,7 +243,6 @@ async function runPrediction() {
 
   setLoading(true);
   try {
-    // Prediksi gabungan
     const r1 = await fetch(`${API}/predict`, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ events:[lag3,lag2,lag1], jumlah_kain:kain, panjang_kain_m:pjg, source:'Dashboard Web' })
@@ -202,7 +250,6 @@ async function runPrediction() {
     const d1 = await r1.json();
     if (d1.error) throw new Error(d1.error);
 
-    // Rolling 7 hari
     const r2 = await fetch(`${API}/predict/rolling`, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ events:[lag3,lag2,lag1], days:7 })
@@ -210,22 +257,79 @@ async function runPrediction() {
     const d2 = await r2.json();
     if (d2.error) throw new Error(d2.error);
 
-    const forecast  = d1.svr.forecast;
-    const isAnomaly = d1.ocsvm.is_anomaly;
-    const score     = d1.ocsvm.score;
-    const tgSent    = d1.telegram_sent;
-    const liter     = forecast * LITER_RATIO;
+    const forecast    = d1.svr.forecast;
+    const isAnomaly   = d1.ocsvm.is_anomaly;
+    const score       = d1.ocsvm.score;
+    const tgSent      = d1.telegram_sent;
+    const liter       = forecast * LITER_RATIO;
+    const rekomendasi = d1.rekomendasi;
 
     lastData = { lag1, lag2, lag3, forecast, isAnomaly, rolling: d2.forecasts };
 
     updateStats(forecast, liter, isAnomaly, score, tgSent);
+    renderRekomendasi(rekomendasi);
     renderChart();
-    addHistory(lag1, lag2, lag3, kain, pjg, forecast, liter, score, isAnomaly);
+    addHistory(lag1, lag2, lag3, kain, pjg, forecast, liter, score, isAnomaly, rekomendasi);
     document.getElementById('statsGrid').classList.add('show');
     document.getElementById('chartCard').classList.add('show');
     document.getElementById('histCard').classList.add('show');
   } catch(e) { alert('Error: '+e.message); }
   finally { setLoading(false); }
+}
+
+function renderRekomendasi(rek) {
+  if (!rek) rek = { tipe:'normal', severity:'normal', emoji:'✅',
+    tindakan:'Kondisi normal. Tidak diperlukan tindakan khusus.',
+    bahan_kimia:[], infrastruktur:[] };
+
+  const sev = rek.severity || 'normal';
+  const cfg = SEV_CONFIG[sev] || SEV_CONFIG.normal;
+
+  document.getElementById('rekTitle').style.display = 'block';
+  document.getElementById('rekCard').className = `rek-card show ${cfg.cls}`;
+  document.getElementById('rekEmoji').textContent  = rek.emoji || '✅';
+  document.getElementById('rekJudul').textContent  =
+    sev === 'normal'     ? 'Kondisi Sistem Normal' :
+    sev === 'peringatan' ? 'Peringatan — Volume Drop' :
+    `Anomali Terdeteksi — ${cfg.label}`;
+  const badge = document.getElementById('rekBadge');
+  badge.className   = `rek-badge ${cfg.badge}`;
+  badge.textContent = cfg.label;
+  document.getElementById('rekTindakan').textContent = rek.tindakan;
+
+  const kimiaWrap = document.getElementById('rekKimiaWrap');
+  const kimia     = document.getElementById('rekKimia');
+  if (rek.bahan_kimia && rek.bahan_kimia.length) {
+    kimiaWrap.style.display = 'block';
+    kimia.innerHTML = rek.bahan_kimia.map(b => `
+      <div class="kimia-item">
+        <div class="kimia-icon">🧪</div>
+        <div>
+          <div class="kimia-nama">${b.nama}</div>
+          <div class="kimia-dosis">📏 ${b.dosis}</div>
+          ${b.lokasi ? `<div class="kimia-lokasi">📍 ${b.lokasi}</div>` : ''}
+          ${b.alasan ? `<div class="kimia-alasan">${b.alasan}</div>` : ''}
+        </div>
+      </div>`).join('');
+  } else { kimiaWrap.style.display = 'none'; }
+
+  const infraWrap = document.getElementById('rekInfraWrap');
+  const infra     = document.getElementById('rekInfra');
+  if (rek.infrastruktur && rek.infrastruktur.length) {
+    infraWrap.style.display = 'block';
+    infra.innerHTML = rek.infrastruktur.map(i => `
+      <div class="infra-item">
+        <div class="infra-icon">🏗️</div>
+        <div>
+          <div class="infra-nama">${i.nama}</div>
+          <div class="infra-tindakan">${i.tindakan}</div>
+        </div>
+      </div>`).join('');
+  } else { infraWrap.style.display = 'none'; }
+
+  const hasContent = (rek.bahan_kimia && rek.bahan_kimia.length) ||
+                     (rek.infrastruktur && rek.infrastruktur.length);
+  document.getElementById('rekGrid').style.display = hasContent ? 'grid' : 'none';
 }
 
 function updateStats(forecast, liter, isAnomaly, score, tgSent) {
@@ -312,11 +416,13 @@ function renderChart() {
   });
 }
 
-function addHistory(l1,l2,l3,kain,pjg,forecast,liter,score,isAnomaly) {
+function addHistory(l1,l2,l3,kain,pjg,forecast,liter,score,isAnomaly,rek) {
   rowCount++;
-  const now=new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  const body=document.getElementById('histBody');
-  if(rowCount===1) body.innerHTML='';
+  const now  = new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const body = document.getElementById('histBody');
+  if (rowCount===1) body.innerHTML='';
+  const sev = rek ? rek.severity : 'normal';
+  const cfg = SEV_CONFIG[sev] || SEV_CONFIG.normal;
   body.insertAdjacentHTML('afterbegin',`
     <tr>
       <td style="font-weight:600;color:var(--muted)">${rowCount}</td>
@@ -324,8 +430,9 @@ function addHistory(l1,l2,l3,kain,pjg,forecast,liter,score,isAnomaly) {
       <td>${kain}</td><td>${pjg}</td>
       <td style="font-weight:700;color:var(--teal)">${forecast.toFixed(2)}</td>
       <td style="font-weight:700;color:var(--orange)">${liter.toLocaleString('id-ID')} L</td>
-      <td style="color:${score<0?'var(--red)':'var(--green)'}">${score.toFixed(4)}</td>
+      <td style="color:${score<0?'var(--red)':'var(--green)'};font-weight:700">${score.toFixed(4)}</td>
       <td><span class="tag ${isAnomaly?'tag-anomali':'tag-normal'}">${isAnomaly?'⚠️ Anomali':'✅ Normal'}</span></td>
+      <td><span class="rek-badge ${cfg.badge}" style="font-size:.65rem">${cfg.label}</span></td>
     </tr>`);
 }
 
