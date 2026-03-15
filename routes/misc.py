@@ -2,6 +2,7 @@ import os
 import requests
 from datetime import datetime
 from flask import Blueprint, jsonify
+from flask import send_from_directory
 
 bp = Blueprint("misc", __name__)
 
@@ -13,6 +14,13 @@ TELEGRAM_API_URL   = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}"
 @bp.route("/", methods=["GET"])
 def index():
     return jsonify({"status": "ok", "message": "CORAQUE API is running"}), 200
+
+@bp.route("/docs", methods=["GET"])
+def docs():
+    return send_from_directory(
+        os.path.join(os.path.dirname(os.path.dirname(__file__)), "static"),
+        "docs.html"
+    )
 
 
 @bp.route("/telegram/test", methods=["GET"])
