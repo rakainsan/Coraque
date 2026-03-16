@@ -1,15 +1,11 @@
 def get_rekomendasi(oc_score: float, event_lag1: float,
                     rolling_mean_3: float) -> dict:
     """
-    Severity diturunkan dari OCSVM decision function score Pipeline B.
-    Threshold berbasis distribusi empiris data training (OCSVMfix.ipynb):
-        Model    : Pipeline B — Lag + SVR pred + Produksi
-        Fitur    : event_lag1, lag2, lag3, rolling_mean_3, svr_pred,
-                   jumlah_kain, panjang_kain_m
-        Range anomali training : -0.000414 s/d -0.000020
-        Ringan   : -0.000020 ≤ score < 0      (mendekati boundary)
-        Sedang   : -0.000310 ≤ score < -0.000020
-        Berat    : score < -0.000310           (paling jauh dari normal)
+    Threshold berbasis distribusi score produksi nyata (scan empiris):
+    Range anomali nyata : -0.027 s/d -1.35
+    Ringan : -0.027 ≤ score < 0       (lag1 ~30–32)
+    Sedang : -0.460 ≤ score < -0.027  (lag1 ~33–34)
+    Berat  : score < -0.460           (lag1 ≥35)
     """
     tipe = "spike" if event_lag1 >= rolling_mean_3 else "drop"
 
@@ -46,8 +42,8 @@ def get_rekomendasi(oc_score: float, event_lag1: float,
             ]
         }
 
-    # ── SPIKE RINGAN  (-0.000020 ≤ score < 0) ──────────────────────────
-    if oc_score >= -0.000020:
+    # ── SPIKE RINGAN  (-0.027 ≤ score < 0) ──────────────────────────
+    if oc_score >= -0.0270:
         return {
             "tipe"         : "spike",
             "severity"     : "ringan",
@@ -74,8 +70,8 @@ def get_rekomendasi(oc_score: float, event_lag1: float,
             "infrastruktur": []
         }
 
-    # ── SPIKE SEDANG  (-0.000310 ≤ score < -0.000020) ────────────────────
-    elif oc_score >= -0.000310:
+    # ── SPIKE SEDANG  (-0.460 ≤ score < -0.027) ────────────────────
+    elif oc_score >= -0.460:
         return {
             "tipe"         : "spike",
             "severity"     : "sedang",
@@ -104,7 +100,7 @@ def get_rekomendasi(oc_score: float, event_lag1: float,
             "infrastruktur": []
         }
 
-    # ── SPIKE BERAT  (score < -0.0123) ───────────────────────────────
+    # ── SPIKE BERAT  (score < -0.460) ───────────────────────────────
     else:
         return {
             "tipe"         : "spike",
