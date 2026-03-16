@@ -1,12 +1,15 @@
 def get_rekomendasi(oc_score: float, event_lag1: float,
                     rolling_mean_3: float) -> dict:
     """
-    Severity diturunkan langsung dari OCSVM decision function score.
+    Severity diturunkan dari OCSVM decision function score Pipeline B.
     Threshold berbasis distribusi empiris data training (OCSVMfix.ipynb):
-        Range anomali total : -0.0185 s/d 0
-        Spike Ringan        : -0.0062 ≤ score < 0   (1/3 pertama)
-        Spike Sedang        : -0.0123 ≤ score < -0.0062  (1/3 kedua)
-        Spike Berat         : score < -0.0123        (1/3 terakhir)
+        Model    : Pipeline B — Lag + SVR pred + Produksi
+        Fitur    : event_lag1, lag2, lag3, rolling_mean_3, svr_pred,
+                   jumlah_kain, panjang_kain_m
+        Range anomali training : -0.000414 s/d -0.000020
+        Ringan   : -0.000020 ≤ score < 0      (mendekati boundary)
+        Sedang   : -0.000310 ≤ score < -0.000020
+        Berat    : score < -0.000310           (paling jauh dari normal)
     """
     tipe = "spike" if event_lag1 >= rolling_mean_3 else "drop"
 
@@ -43,8 +46,8 @@ def get_rekomendasi(oc_score: float, event_lag1: float,
             ]
         }
 
-    # ── SPIKE RINGAN  (-0.0062 ≤ score < 0) ──────────────────────────
-    if oc_score >= -0.0062:
+    # ── SPIKE RINGAN  (-0.000020 ≤ score < 0) ──────────────────────────
+    if oc_score >= -0.000020:
         return {
             "tipe"         : "spike",
             "severity"     : "ringan",
@@ -71,8 +74,8 @@ def get_rekomendasi(oc_score: float, event_lag1: float,
             "infrastruktur": []
         }
 
-    # ── SPIKE SEDANG  (-0.0123 ≤ score < -0.0062) ────────────────────
-    elif oc_score >= -0.0123:
+    # ── SPIKE SEDANG  (-0.000310 ≤ score < -0.000020) ────────────────────
+    elif oc_score >= -0.000310:
         return {
             "tipe"         : "spike",
             "severity"     : "sedang",
