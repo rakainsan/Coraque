@@ -3,9 +3,9 @@ def get_rekomendasi(oc_score: float, event_lag1: float,
     """
     Threshold berbasis distribusi score produksi nyata (scan empiris):
     Range anomali nyata : -0.027 s/d -1.35
-    Ringan : -0.027 ≤ score < 0       (lag1 ~30–32)
-    Sedang : -0.460 ≤ score < -0.027  (lag1 ~33–34)
-    Berat  : score < -0.460           (lag1 ≥35)
+    Ringan : -0.027 ≤ score < 0
+    Sedang : -0.460 ≤ score < -0.027
+    Berat  : score < -0.460
     """
     tipe = "spike" if event_lag1 >= rolling_mean_3 else "drop"
 
@@ -21,29 +21,28 @@ def get_rekomendasi(oc_score: float, event_lag1: float,
             "infrastruktur": []
         }
 
-    # ── DROP ──────────────────────────────────────────────────────────
-    if tipe == "drop":
-        return {
-            "tipe"         : "drop",
-            "severity"     : "peringatan",
-            "emoji"        : "🔻",
-            "tindakan"     : "Volume limbah jauh di bawah pola normal. "
-                             "Lakukan inspeksi fisik sistem IPAL dan "
-                             "periksa kondisi sensor water level bak 1.",
-            "bahan_kimia"  : [],
-            "infrastruktur": [
-                {
-                    "nama"    : "Inspeksi Sistem",
-                    "tindakan": "1. Periksa kondisi sensor water level bak 1. "
-                                "2. Periksa kebocoran pipa dan sambungan antar bak. "
-                                "3. Konfirmasi jadwal produksi termasuk hari libur "
-                                "atau tanggal merah."
-                }
-            ]
-        }
+    # ── TENTUKAN SEVERITY DULU ────────────────────────────────────────
+    # Baru setelah severity ditentukan, bedakan spike vs drop
 
-    # ── SPIKE RINGAN  (-0.027 ≤ score < 0) ──────────────────────────
+    # ── RINGAN (-0.027 ≤ score < 0) ──────────────────────────────────
     if oc_score >= -0.0270:
+        if tipe == "drop":
+            # Drop ringan — volume sedikit di bawah normal, cukup pantau
+            return {
+                "tipe"         : "drop",
+                "severity"     : "peringatan",
+                "emoji"        : "🔻",
+                "tindakan"     : "Volume limbah sedikit di bawah pola normal. "
+                                 "Pantau kondisi sistem dan konfirmasi jadwal produksi.",
+                "bahan_kimia"  : [],
+                "infrastruktur": [
+                    {
+                        "nama"    : "Pemantauan",
+                        "tindakan": "Konfirmasi jadwal produksi hari ini. "
+                                    "Cek apakah ada libur atau pengurangan produksi."
+                    }
+                ]
+            }
         return {
             "tipe"         : "spike",
             "severity"     : "ringan",
@@ -63,15 +62,33 @@ def get_rekomendasi(oc_score: float, event_lag1: float,
                     "dosis" : "Tambah 10–15% dari dosis operasional normal",
                     "lokasi": "Bak 3 — Sedimentasi",
                     "alasan": "Flokulasi lebih efektif menangani partikel "
-                              "tersuspensi tambahan "
-                              
+                              "tersuspensi tambahan (Radityaningrum, 2017)"
                 }
             ],
             "infrastruktur": []
         }
 
-    # ── SPIKE SEDANG  (-0.460 ≤ score < -0.027) ────────────────────
+    # ── SEDANG (-0.460 ≤ score < -0.027) ─────────────────────────────
     elif oc_score >= -0.460:
+        if tipe == "drop":
+            return {
+                "tipe"         : "drop",
+                "severity"     : "peringatan",
+                "emoji"        : "🔻",
+                "tindakan"     : "Volume limbah jauh di bawah pola normal. "
+                                 "Lakukan inspeksi fisik sistem IPAL dan "
+                                 "periksa kondisi sensor water level bak 1.",
+                "bahan_kimia"  : [],
+                "infrastruktur": [
+                    {
+                        "nama"    : "Inspeksi Sistem",
+                        "tindakan": "1. Periksa kondisi sensor water level bak 1. "
+                                    "2. Periksa kebocoran pipa dan sambungan antar bak. "
+                                    "3. Konfirmasi jadwal produksi termasuk hari libur "
+                                    "atau tanggal merah."
+                    }
+                ]
+            }
         return {
             "tipe"         : "spike",
             "severity"     : "sedang",
@@ -86,22 +103,40 @@ def get_rekomendasi(oc_score: float, event_lag1: float,
                     "lokasi": "Bak 3 — Sedimentasi",
                     "alasan": "PAC membentuk flok lebih cepat dari Tawas "
                               "saat hydraulic retention time memendek "
-                              
+                              "(Radityaningrum & Caroline, 2017)"
                 },
                 {
                     "nama"  : "Tawas Al₂(SO₄)₃",
                     "dosis" : "150 mg/L",
                     "lokasi": "Bak 4 dan 3 — Netralisasi Sedimentasi",
                     "alasan": "Kombinasi PAC + Tawas optimal untuk "
-                              "penurunan warna limbah batik "
-                              
+                              "penurunan warna limbah batik (Zaimaturahmi, 2023)"
                 }
             ],
             "infrastruktur": []
         }
 
-    # ── SPIKE BERAT  (score < -0.460) ───────────────────────────────
+    # ── BERAT (score < -0.460) ────────────────────────────────────────
     else:
+        if tipe == "drop":
+            return {
+                "tipe"         : "drop",
+                "severity"     : "peringatan",
+                "emoji"        : "🔻",
+                "tindakan"     : "Volume limbah sangat jauh di bawah normal. "
+                                 "Kemungkinan terjadi gangguan serius pada sistem. "
+                                 "Lakukan inspeksi menyeluruh segera.",
+                "bahan_kimia"  : [],
+                "infrastruktur": [
+                    {
+                        "nama"    : "Inspeksi Darurat",
+                        "tindakan": "1. Periksa kondisi sensor water level bak 1. "
+                                    "2. Periksa kebocoran pipa dan sambungan antar bak. "
+                                    "3. Konfirmasi jadwal produksi. "
+                                    "4. Hubungi teknisi jika sensor tidak merespons."
+                    }
+                ]
+            }
         return {
             "tipe"         : "spike",
             "severity"     : "berat",
@@ -116,14 +151,14 @@ def get_rekomendasi(oc_score: float, event_lag1: float,
                     "dosis" : "75–100 mg/L",
                     "lokasi": "Bak 3 — Sedimentasi",
                     "alasan": "Dosis tinggi untuk tangani beban organik ekstrem "
-                              
+                              "(Radityaningrum, 2017)"
                 },
                 {
                     "nama"  : "Tawas Al₂(SO₄)₃",
                     "dosis" : "150 mg/L",
                     "lokasi": "Bak 4 — Netralisasi",
                     "alasan": "Netralisasi pH output dan koagulasi sekunder "
-                              
+                              "(Zaimaturahmi, 2023)"
                 }
             ],
             "infrastruktur": [
