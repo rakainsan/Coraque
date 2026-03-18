@@ -56,6 +56,7 @@ def get_rekomendasi(oc_score: float, event_lag1: float,
                     "lokasi": "Bak 4",
                     "alasan": "Beban TSS meningkat proporsional terhadap "
                               "kenaikan volume limbah"
+                              "(Zaimaturahmi, 2023)"
                 },
                 {
                     "nama"  : "PAC (Poly Aluminium Chloride)",
@@ -63,6 +64,7 @@ def get_rekomendasi(oc_score: float, event_lag1: float,
                     "lokasi": "Bak 3 — Sedimentasi",
                     "alasan": "Flokulasi lebih efektif menangani partikel "
                               "tersuspensi tambahan "
+                              "(Radityaningrum & Caroline, 2017)"
                 }
             ],
             "infrastruktur": []
@@ -75,17 +77,12 @@ def get_rekomendasi(oc_score: float, event_lag1: float,
                 "tipe"         : "drop",
                 "severity"     : "peringatan",
                 "emoji"        : "🔻",
-                "tindakan"     : "Volume limbah jauh di bawah pola normal. \n"
-                                 "Lakukan inspeksi fisik sistem IPAL dan \n"
-                                 "periksa kondisi sensor water level bak 1. \n",
+                "tindakan"     : "Volume limbah jauh di bawah pola normal. \n Lakukan inspeksi fisik sistem IPAL dan \n periksa kondisi sensor water level bak 1.",
                 "bahan_kimia"  : [],
                 "infrastruktur": [
                     {
                         "nama"    : "Inspeksi Sistem",
-                        "tindakan": "1. Periksa kondisi sensor water level bak 1. \n"
-                                    "2. Periksa kebocoran pipa dan sambungan antar bak. \n"
-                                    "3. Konfirmasi jadwal produksi termasuk hari libur \n"
-                                    "atau tanggal merah."
+                        "tindakan": "1. Periksa kondisi sensor water level bak 1. \n 2. Periksa kebocoran pipa dan sambungan antar bak. \n 3. Konfirmasi jadwal produksi termasuk hari libur atau tanggal merah."
                     }
                 ]
             }
@@ -95,7 +92,7 @@ def get_rekomendasi(oc_score: float, event_lag1: float,
             "emoji"        : "🚨",
             "tindakan"     : "Volume limbah signifikan di atas normal. "
                              "Gunakan kombinasi PAC dan Tawas untuk "
-                             "mengoptimalkan proses koagulasi-flokulasi.",
+                             "mengoptimalkan proses elektrokoagulasi-flokulasi.",
             "bahan_kimia"  : [
                 {
                     "nama"  : "PAC (Poly Aluminium Chloride)",
@@ -130,10 +127,7 @@ def get_rekomendasi(oc_score: float, event_lag1: float,
                 "infrastruktur": [
                     {
                         "nama"    : "Inspeksi Darurat",
-                        "tindakan": "1. Periksa kondisi sensor water level bak 1. \n"
-                                    "2. Periksa kebocoran pipa dan sambungan antar bak. \n"
-                                    "3. Konfirmasi jadwal produksi. \n"
-                                    "4. Hubungi teknisi jika sensor tidak merespons. \n"
+                        "tindakan": "1. Periksa kondisi sensor water level bak 1. \n 2. Periksa kebocoran pipa dan sambungan antar bak. \n 3. Konfirmasi jadwal produksi. \n 4. Hubungi teknisi jika sensor tidak merespons."
                     }
                 ]
             }
