@@ -75,16 +75,16 @@ def get_rekomendasi(oc_score: float, event_lag1: float,
                 "tipe"         : "drop",
                 "severity"     : "peringatan",
                 "emoji"        : "🔻",
-                "tindakan"     : "Volume limbah jauh di bawah pola normal. "
-                                 "Lakukan inspeksi fisik sistem IPAL dan "
-                                 "periksa kondisi sensor water level bak 1.",
+                "tindakan"     : "Volume limbah jauh di bawah pola normal. \n"
+                                 "Lakukan inspeksi fisik sistem IPAL dan \n"
+                                 "periksa kondisi sensor water level bak 1. \n",
                 "bahan_kimia"  : [],
                 "infrastruktur": [
                     {
                         "nama"    : "Inspeksi Sistem",
-                        "tindakan": "1. Periksa kondisi sensor water level bak 1. "
-                                    "2. Periksa kebocoran pipa dan sambungan antar bak. "
-                                    "3. Konfirmasi jadwal produksi termasuk hari libur "
+                        "tindakan": "1. Periksa kondisi sensor water level bak 1. \n"
+                                    "2. Periksa kebocoran pipa dan sambungan antar bak. \n"
+                                    "3. Konfirmasi jadwal produksi termasuk hari libur \n"
                                     "atau tanggal merah."
                     }
                 ]
@@ -130,10 +130,10 @@ def get_rekomendasi(oc_score: float, event_lag1: float,
                 "infrastruktur": [
                     {
                         "nama"    : "Inspeksi Darurat",
-                        "tindakan": "1. Periksa kondisi sensor water level bak 1. "
-                                    "2. Periksa kebocoran pipa dan sambungan antar bak. "
-                                    "3. Konfirmasi jadwal produksi. "
-                                    "4. Hubungi teknisi jika sensor tidak merespons."
+                        "tindakan": "1. Periksa kondisi sensor water level bak 1. \n"
+                                    "2. Periksa kebocoran pipa dan sambungan antar bak. \n"
+                                    "3. Konfirmasi jadwal produksi. \n"
+                                    "4. Hubungi teknisi jika sensor tidak merespons. \n"
                     }
                 ]
             }
