@@ -53,16 +53,16 @@ def get_rekomendasi(oc_score: float, event_lag1: float,
                 {
                     "nama"  : "Tawas Al₂(SO₄)₃",
                     "dosis" : "Tambah 10–15% dari dosis operasional normal",
-                    "lokasi": "Bak 3 — Sedimentasi",
+                    "lokasi": "Bak 4",
                     "alasan": "Beban TSS meningkat proporsional terhadap "
-                              "kenaikan volume limbah (Zaimaturahmi, 2023)"
+                              "kenaikan volume limbah"
                 },
                 {
                     "nama"  : "PAC (Poly Aluminium Chloride)",
                     "dosis" : "Tambah 10–15% dari dosis operasional normal",
                     "lokasi": "Bak 3 — Sedimentasi",
                     "alasan": "Flokulasi lebih efektif menangani partikel "
-                              "tersuspensi tambahan (Radityaningrum, 2017)"
+                              "tersuspensi tambahan "
                 }
             ],
             "infrastruktur": []
