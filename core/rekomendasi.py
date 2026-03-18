@@ -21,8 +21,6 @@ def get_rekomendasi(oc_score: float, event_lag1: float,
             "infrastruktur": []
         }
 
-    # ── TENTUKAN SEVERITY DULU ────────────────────────────────────────
-    # Baru setelah severity ditentukan, bedakan spike vs drop
 
     # ── RINGAN (-0.027 ≤ score < 0) ──────────────────────────────────
     if oc_score >= -0.0270:
@@ -105,7 +103,7 @@ def get_rekomendasi(oc_score: float, event_lag1: float,
                 {
                     "nama"  : "Tawas Al₂(SO₄)₃",
                     "dosis" : "150 mg/L",
-                    "lokasi": "Bak 4 dan 3 — Netralisasi Sedimentasi",
+                    "lokasi": "Bak 4 dan 3 — Sedimentasi",
                     "alasan": "Kombinasi PAC + Tawas optimal untuk "
                               "penurunan warna limbah batik (Zaimaturahmi, 2023)"
                 }
@@ -150,7 +148,7 @@ def get_rekomendasi(oc_score: float, event_lag1: float,
                 {
                     "nama"  : "Tawas Al₂(SO₄)₃",
                     "dosis" : "150 mg/L",
-                    "lokasi": "Bak 4 — Netralisasi",
+                    "lokasi": "Bak 4",
                     "alasan": "Netralisasi pH output dan koagulasi sekunder "
                               "(Zaimaturahmi, 2023)"
                 }

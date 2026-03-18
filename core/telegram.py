@@ -12,45 +12,120 @@ LAST_UPDATE_ID     = None
 def send_telegram_notification(svr_forecast: float, rekomendasi: dict,
                                 source: str = "-") -> bool:
     tanggal  = datetime.now().strftime("%d-%m-%Y %H:%M")
-    tipe     = rekomendasi.get("tipe", "-").upper()
-    severity = rekomendasi.get("severity", "-").upper()
+    sev      = rekomendasi.get("severity", "normal")
+    tipe     = rekomendasi.get("tipe", "normal")
+    emoji    = rekomendasi.get("emoji", "✅")
+    tindakan = rekomendasi.get("tindakan", "-")
+    volume   = svr_forecast * 292
 
-    # Bahan kimia
+    # ── Header per severity ───────────────────────────────────────────
+    header_map = {
+        "normal"    : "SISTEM NORMAL — CORAQ",
+        "ringan"    : "ANOMALI SPIKE RINGAN — CORAQ",
+        "sedang"    : "ANOMALI SPIKE SEDANG — CORAQ",
+        "berat"     : "ANOMALI SPIKE BERAT — CORAQ",
+        "peringatan": "PERINGATAN DROP VOLUME — CORAQ",
+    }
+    header = header_map.get(sev, "NOTIFIKASI CORAQ")
+
+    # ── Info volume ───────────────────────────────────────────────────
+    volume_line = (
+        f"Sensor   : {svr_forecast:.0f}x aktivasi\n"
+        f"Volume   : {volume:.2f} liter\n"
+        f"Tipe     : {tipe.upper()}\n"
+        f"Severity : {sev.upper()}\n"
+    )
+
+    # ── Bahan kimia ───────────────────────────────────────────────────
+    bahan_section = ""
     if rekomendasi.get("bahan_kimia"):
-        bahan_lines = ""
+        bahan_section = "\n\n<b>Bahan Kimia:</b>"
         for b in rekomendasi["bahan_kimia"]:
-            bahan_lines += (
-                f"\n  - <b>{b['nama']}</b>"
+            bahan_section += (
+                f"\n  ▸ <b>{b['nama']}</b>"
                 f"\n    Dosis  : {b['dosis']}"
                 f"\n    Lokasi : {b.get('lokasi', '-')}"
             )
-    else:
-        bahan_lines = "\n  Tidak diperlukan bahan kimia tambahan."
+    elif sev not in ("normal",):
+        bahan_section = "\n\n<b>Bahan Kimia:</b>\n  Tidak diperlukan bahan kimia tambahan."
 
-    # Tindakan infrastruktur
+    # ── Infrastruktur / langkah ───────────────────────────────────────
+    infra_section = ""
     if rekomendasi.get("infrastruktur"):
-        infra_lines = ""
+        infra_section = "\n\n<b>Tindakan Tambahan:</b>"
         for inf in rekomendasi["infrastruktur"]:
-            infra_lines += f"\n  - <b>{inf['nama']}</b>: {inf['tindakan']}"
-        infra_section = f"\n\n<b>Tindakan Tambahan:</b>{infra_lines}"
-    else:
-        infra_section = ""
+            infra_section += f"\n  ▸ <b>{inf['nama']}</b>"
+            if inf.get("tindakan"):
+                infra_section += f"\n    {inf['tindakan']}"
+            if inf.get("langkah"):
+                for idx, l in enumerate(inf["langkah"], 1):
+                    infra_section += f"\n    {idx}. {l}"
 
-    message = (
-        f"<b>PERINGATAN ANOMALI — SISTEM CORAQ</b>\n"
-        f"────────────────────────\n"
-        f"Tanggal  : {tanggal}\n"
-        f"Sensor   : {svr_forecast:.0f}x aktivasi\n"
-        f"Volume   : {svr_forecast * 292:.2f} liter\n"
-        f"Tipe     : {tipe}\n"
-        f"Severity : {severity}\n"
-        f"────────────────────────\n"
-        f"<b>Tindakan:</b>\n{rekomendasi.get('tindakan', '-')}\n"
-        f"\n<b>Bahan Kimia:</b>{bahan_lines}"
-        f"{infra_section}\n"
-        f"────────────────────────\n"
-        f"Sumber: {source}"
-    )
+    # ── Rakit pesan per severity ──────────────────────────────────────
+    if sev == "normal":
+        message = (
+            f"✅ <b>{header}</b>\n"
+            f"────────────────────────\n"
+            f"Tanggal  : {tanggal}\n"
+            f"{volume_line}"
+            f"────────────────────────\n"
+            f"{tindakan}\n"
+            f"────────────────────────\n"
+            f"Sumber: {source}"
+        )
+
+    elif sev == "ringan":
+        message = (
+            f"⚠️ <b>{header}</b>\n"
+            f"────────────────────────\n"
+            f"Tanggal  : {tanggal}\n"
+            f"{volume_line}"
+            f"────────────────────────\n"
+            f"<b>Tindakan:</b>\n{tindakan}"
+            f"{bahan_section}\n"
+            f"────────────────────────\n"
+            f"Sumber: {source}"
+        )
+
+    elif sev == "sedang":
+        message = (
+            f"🚨 <b>{header}</b>\n"
+            f"════════════════════════\n"
+            f"Tanggal  : {tanggal}\n"
+            f"{volume_line}"
+            f"════════════════════════\n"
+            f"<b>Tindakan:</b>\n{tindakan}"
+            f"{bahan_section}\n"
+            f"════════════════════════\n"
+            f"Sumber: {source}"
+        )
+
+    elif sev == "berat":
+        message = (
+            f"🆘 <b>{header}</b>\n"
+            f"▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓\n"
+            f"Tanggal  : {tanggal}\n"
+            f"{volume_line}"
+            f"▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓\n"
+            f"<b>Tindakan Segera:</b>\n{tindakan}"
+            f"{bahan_section}"
+            f"{infra_section}\n"
+            f"▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓\n"
+            f"Sumber: {source}"
+        )
+
+    else:  # peringatan (drop)
+        message = (
+            f"🔻 <b>{header}</b>\n"
+            f"────────────────────────\n"
+            f"Tanggal  : {tanggal}\n"
+            f"{volume_line}"
+            f"────────────────────────\n"
+            f"<b>Tindakan:</b>\n{tindakan}"
+            f"{infra_section}\n"
+            f"────────────────────────\n"
+            f"Sumber: {source}"
+        )
 
     try:
         resp = requests.post(
