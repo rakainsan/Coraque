@@ -89,18 +89,18 @@ def ask_llm(prompt: str) -> str:
 app.register_blueprint(predict_bp)
 app.register_blueprint(misc_bp)
 
+_polling_lock_fp = None
 # ── Telegram polling — jalan saat startup gunicorn ───────────────────────────
 def start_polling_once():
+    global _polling_lock_fp
     lock_file = '/tmp/coraq_telegram_polling.lock'
     try:
-        fp = open(lock_file, 'w')
-        fcntl.flock(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        # Berhasil dapat lock — jalankan polling
+        _polling_lock_fp = open(lock_file, 'w')
+        fcntl.flock(_polling_lock_fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
         threading.Thread(
             target=polling_telegram, args=(ask_llm,), daemon=True
         ).start()
     except IOError:
-        # Worker lain sudah jalan polling — skip
         pass
 
 start_polling_once()
