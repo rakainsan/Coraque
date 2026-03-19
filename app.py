@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
 from groq import Groq
+import fcntl
 
 
 load_dotenv()
@@ -89,9 +90,20 @@ app.register_blueprint(predict_bp)
 app.register_blueprint(misc_bp)
 
 # ── Telegram polling — jalan saat startup gunicorn ───────────────────────────
-threading.Thread(
-    target=polling_telegram, args=(ask_llm,), daemon=True
-).start()
+def start_polling_once():
+    lock_file = '/tmp/coraq_telegram_polling.lock'
+    try:
+        fp = open(lock_file, 'w')
+        fcntl.flock(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        # Berhasil dapat lock — jalankan polling
+        threading.Thread(
+            target=polling_telegram, args=(ask_llm,), daemon=True
+        ).start()
+    except IOError:
+        # Worker lain sudah jalan polling — skip
+        pass
+
+start_polling_once()
 
 # ── Run (development only) ───────────────────────────────────────────────────
 if __name__ == "__main__":
